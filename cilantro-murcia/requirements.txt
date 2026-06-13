@@ -6,11 +6,18 @@ fastapi>=0.110
 uvicorn[standard]>=0.27
 pydantic>=2.0
 
+# Persistencia (SQLite por defecto; PostgreSQL/PostGIS vía DATABASE_URL)
+SQLAlchemy>=2.0
+# psycopg[binary]>=3.1   # descomentar para PostgreSQL
+
 # Meteo
 requests>=2.31
 
 # LLM (opcional; la app funciona sin él)
 anthropic>=0.39
+
+# Push (opcional; backend de consola si no está)
+# firebase-admin>=6.5
 
 # Dev / test
 pytest>=8.0

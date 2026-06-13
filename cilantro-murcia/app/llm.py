@@ -39,7 +39,10 @@ def _template_explanation(grounding: dict) -> str:
         parts.append(
             f"Mejor fecha de siembra sugerida: {s['best_date']} "
             f"(riesgo máx. de espigado {s['max_bolt_risk']}/100).")
-    return " ".join(parts) or "Sin recomendaciones para hoy."
+    if "alertas" in grounding:
+        for a in grounding["alertas"]:
+            parts.append(f"[{a['tipo']}/{a['severidad']}] {a['mensaje']} {a['accion']}")
+    return " ".join(parts) or "Todo en orden: sin acciones para hoy."
 
 
 def explain(grounding: dict, question: str | None = None) -> str:

@@ -7,3 +7,6 @@ venv/
 .env
 *.db
 .DS_Store
+
+# Salida generada por la calibración
+config/calibration_local.yaml

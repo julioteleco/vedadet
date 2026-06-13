@@ -80,3 +80,38 @@ class Alert(BaseModel):
     mensaje: str
     accion: str
     fecha_limite: Optional[date] = None
+
+
+class OnboardRequest(BaseModel):
+    lat: float = 37.98
+    lon: float = -1.13
+    ec_agua_dS_m: Optional[float] = None
+    fetch_live: bool = True
+
+
+class ParcelaCreate(BaseModel):
+    nombre: str = "Mi parcela"
+    lat: float
+    lon: float
+    altitud_m: Optional[float] = None
+    tipo_suelo: Optional[str] = None
+    ph: Optional[float] = None
+    ec_agua_dS_m: Optional[float] = None
+    microclima: Optional[Microclimate] = None
+    auto_derive: bool = True   # deriva microclima/SIAR/municipio en el onboarding
+
+
+class CicloCreate(BaseModel):
+    parcela_id: int
+    variedad: str = "Calypso"
+    objetivo: Goal = Goal.hoja
+    fecha_siembra: date
+
+
+class ObservacionCreate(BaseModel):
+    ciclo_id: int
+    tipo: str            # emergencia | primera_hoja | espigado | semilla
+    fecha: date
+    gdd_al_observar: Optional[float] = None
+    tmax_al_observar: Optional[float] = None
+    nota: Optional[str] = None

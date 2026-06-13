@@ -31,14 +31,26 @@ cilantro-murcia/
 │   │   ├── irrigation.py    # ETc = Kc·ET0, balance hídrico, Hargreaves
 │   │   ├── frost.py         # alertas de helada
 │   │   └── sowing_window.py # optimizador + plan escalonado
-│   ├── weather/openmeteo.py # fuente meteo primaria (ET0 FAO + forecast)
+│   ├── weather/             # meteo: provider unifica las 4 fuentes
+│   │   ├── openmeteo.py     #   primaria (ET0 FAO + forecast 16 d)
+│   │   ├── siar.py          #   ET0 Penman-Monteith local (calibración)
+│   │   ├── aemet.py         #   helada oficial (override)
+│   │   └── provider.py      #   estrategia + fallback a climatología
 │   ├── data/                # normales climáticas de Murcia (fallback offline)
+│   ├── db.py                # persistencia SQLAlchemy (SQLite/PostgreSQL+PostGIS)
+│   ├── onboarding.py        # deriva microclima/SIAR/altitud, fuerza EC del agua
+│   ├── alerts.py            # motor de alertas diarias por ciclo
+│   ├── calibration.py       # bucle de calibración desde observaciones reales
+│   ├── notifications.py     # push (FCM-ready; consola por defecto)
+│   ├── jobs.py              # job diario programable
 │   ├── llm.py               # explicación LLM (solo downstream; opcional)
 │   ├── models.py            # entidades (Pydantic) — PARTE 2-C
 │   ├── service.py           # orquestación meteo + motor + LLM
-│   └── main.py              # API FastAPI
+│   └── main.py              # API FastAPI (+ sirve la UI web)
+├── web/index.html           # cliente web (surrogate de la app móvil)
 ├── cli/demo.py              # demo OFFLINE de todo el motor
-└── tests/                   # 32 tests del motor
+├── Dockerfile, docker-compose.yml  # stack API + PostGIS
+└── tests/                   # 46 tests
 ```
 
 ## Instalación
@@ -74,9 +86,18 @@ Endpoints:
 |---|---|---|
 | GET  | `/health` | estado + versión de config agronómica |
 | GET  | `/varieties` | cultivares y su resistencia al espigado |
+| POST | `/onboard` | deriva microclima/SIAR/municipio + exige EC del agua |
+| POST | `/parcelas`, GET `/parcelas[/{id}]` | alta/consulta de parcelas |
+| POST | `/ciclos`, GET `/ciclos/{id}` | alta/consulta de ciclos de cultivo |
+| POST | `/ciclos/{id}/daily-update` | avanza GDD/etapa y emite alertas del día |
+| GET  | `/parcelas/{id}/alertas` | historial de alertas |
+| POST | `/observaciones` | registra observación real (calibración) |
+| POST | `/calibracion/run` | propone recalibración local de constantes |
 | POST | `/recommend/bolting` | riesgo de espigado hoy + acción |
 | POST | `/recommend/irrigation` | L/m² a regar hoy (ET0·Kc) |
 | POST | `/recommend/sowing` | mejor(es) fecha(s) de siembra + escalonado |
+
+También sirve la **UI web** en `/` (onboarding, calendario de siembra, alertas).
 
 Ejemplo:
 
@@ -126,10 +147,33 @@ especificación). Fuerza la entrada de la EC del agua local en el onboarding.
 python -m pytest -q     # 32 tests
 ```
 
+## Stack completo con Docker
+
+```bash
+docker compose up --build      # API en :8000 + PostgreSQL/PostGIS
+```
+
+El `provider` calibra la ET0 de Open-Meteo con la estación SIAR más cercana y usa
+AEMET como override de helada cuando hay claves (`SIAR_API_KEY`, `AEMET_API_KEY`);
+sin ellas funciona con Open-Meteo + climatología.
+
+## Job diario
+
+```bash
+python -m app.jobs             # recorre ciclos activos, genera alertas y notifica
+```
+
+Pensado para cron / APScheduler / Cloud Scheduler.
+
 ## Hoja de ruta
 
 - [x] v1: núcleo determinista (GDD, fotoperiodo, espigado, riego, helada, ventana)
 - [x] API FastAPI + CLI + grounding LLM opcional
-- [ ] v2: SIAR + AEMET (ET0 local + helada oficial), PostgreSQL/PostGIS
-- [ ] App móvil (Flutter/React Native) + push (FCM)
-- [ ] Bucle de calibración: registrar emergencia/cosecha/espigado reales por ciclo
+- [x] v2: SIAR + AEMET (ET0 local + helada oficial), PostgreSQL/PostGIS
+- [x] Persistencia completa (parcelas, ciclos, eventos, snapshots, alertas)
+- [x] Bucle de calibración: registrar emergencia/cosecha/espigado reales por ciclo
+- [x] Onboarding (deriva microclima/SIAR/altitud, fuerza EC del agua)
+- [x] Motor de alertas + job diario + push (FCM-ready)
+- [x] Cliente web (surrogate de la app móvil)
+- [ ] App móvil nativa (Flutter/React Native) consumiendo esta API
+- [ ] Despliegue gestionado (Cloud Run / Fly.io) + observabilidad

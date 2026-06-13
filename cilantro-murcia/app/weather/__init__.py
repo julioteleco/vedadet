@@ -1,5 +1,7 @@
-"""Integración meteorológica. Primaria: Open-Meteo (ET0 FAO + forecast).
+"""Integración meteorológica.
 
-v2: SIAR (ET0 Penman-Monteith local) + AEMET (helada oficial). Ver PARTE 2-B.
+Estrategia (provider.py): Open-Meteo primaria (ET0 FAO + forecast) calibrada con
+SIAR (ET0 Penman-Monteith local), AEMET como override de helada oficial, y
+climatología de Murcia como fallback offline. Ver PARTE 2-B.
 """
-from . import openmeteo  # noqa: F401
+from . import aemet, openmeteo, provider, siar  # noqa: F401
