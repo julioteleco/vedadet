@@ -137,3 +137,6 @@ eval_dirs/
 nohup.out
 
 tools/eval_widerface
+
+# Artefacto de empaquetado (se genera con make zip)
+cilantro-murcia.zip
