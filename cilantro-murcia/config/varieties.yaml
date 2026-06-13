@@ -1,0 +1,43 @@
+# Cultivares de cilantro — resistencia relativa al espigado.
+# bolt_delay_days: retraso de espigado RELATIVO a 'Santo' (referencia = 0).
+#   [ESTIMADO/CALIBRAR] magnitudes aproximadas de nivel extensión.
+# bolt_factor: multiplicador del BoltRisk (<1 = más resistente).
+# days_to_leaf / days_to_seed: días aproximados a cosecha.
+# kc_set: clave en agronomy.yaml -> kc_sets
+
+varieties:
+  - name: Calypso
+    bolt_delay_days: 21      # el más lento, ~3 semanas más que Santo
+    bolt_factor: 0.70
+    days_to_leaf: [50, 55]
+    days_to_seed: [90, 120]
+    kc_set: leaf_default
+    notes: "El más resistente al espigado. Default recomendado para hoja."
+  - name: Santo
+    bolt_delay_days: 0       # REFERENCIA
+    bolt_factor: 1.00
+    days_to_leaf: [52, 55]
+    days_to_seed: [90, 120]
+    kc_set: leaf_default
+    notes: "Estándar 'Long Standing / Slow Bolt'. Buena resistencia."
+  - name: Leisure
+    bolt_delay_days: 7
+    bolt_factor: 0.90
+    days_to_leaf: [50, 55]
+    days_to_seed: [90, 120]
+    kc_set: leaf_default
+    notes: "Tolerante al calor."
+  - name: Caribe
+    bolt_delay_days: 5
+    bolt_factor: 0.92
+    days_to_leaf: [50, 55]
+    days_to_seed: [90, 120]
+    kc_set: leaf_default
+    notes: "Mejor que Santo, bueno para invernadero."
+  - name: Cruiser
+    bolt_delay_days: 3
+    bolt_factor: 0.95
+    days_to_leaf: [50, 55]
+    days_to_seed: [90, 120]
+    kc_set: leaf_default
+    notes: "Erguido, fácil de cosechar."

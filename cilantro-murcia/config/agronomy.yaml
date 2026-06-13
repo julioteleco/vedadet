@@ -1,0 +1,130 @@
+# =====================================================================
+# CONSTANTES AGRONÓMICAS — Cilantro (Coriandrum sativum) en Murcia
+# =====================================================================
+# ARCHIVO ÚNICO Y VERSIONADO. Todas las constantes del motor determinista
+# viven aquí para que un agrónomo pueda calibrarlas SIN tocar código.
+#
+# Cada bloque indica si el valor está:
+#   [BIEN ESTABLECIDO]  -> respaldado por literatura revisada / FAO-56
+#   [ESTIMADO/CALIBRAR] -> valor de extensión o transferido; ajustar en campo
+# (ver PARTE 2-F del documento de base).
+# =====================================================================
+
+version: "1.0.0"
+updated: "2026-06-13"
+
+# ---------------------------------------------------------------------
+# Temperaturas cardinales (°C)
+# [BIEN ESTABLECIDO] Tbase ~4 / Tupper 30  (López-Urrea/Paredes et al. 2025,
+#   citando Diederichsen 1996, Hernández-Dávila 2003, Moniruzzaman 2015)
+# Germinación: Ghobadi et al. 2013 (Univ. Razi)
+# ---------------------------------------------------------------------
+temperatures:
+  t_base: 4.0          # Tbase para GDD
+  t_cap: 30.0          # corte superior GDD (Tupper)
+  germ_optimum: 24.83
+  germ_floor: 4.37
+  germ_ceiling: 33.83
+  veg_optimum_low: 15.0
+  veg_optimum_high: 25.0
+  soil_germ_low: 13.0  # suelo para emergencia 7-14 d
+  soil_germ_high: 20.0
+
+# ---------------------------------------------------------------------
+# Modelo GDD por etapa (base 4°C, corte 30°C)
+# [ESTIMADO/CALIBRAR] No existe partición publicada hoja vs semilla.
+# Rangos: emergencia 80-120; primera hoja 300-450; semilla 1300-1700.
+# ---------------------------------------------------------------------
+gdd_stages:
+  emergence: 100        # GDD acumulados aprox. a emergencia
+  first_leaf_harvest: 375
+  green_seed: 900
+  seed_maturity: 1500
+
+# ---------------------------------------------------------------------
+# Bolting risk (espigado)
+# [ESTIMADO/CALIBRAR] T_bolt 24°C y DL_crit 12h son cifras de extensión,
+# NO validadas en ensayo. Exponer como editables.
+# ---------------------------------------------------------------------
+bolting:
+  t_bolt: 24.0          # umbral de máxima diaria que empieza a estresar
+  dl_crit: 12.0         # fotoperiodo crítico (h)
+  dl_max: 14.5          # fotoperiodo de saturación de presión (h)
+  heat_window_days: 10  # ventana de carga de calor acumulada
+  heat_decay: 0.80      # decaimiento exponencial diario de la carga
+  weights:
+    w_heat: 0.40        # peso carga de calor reciente
+    w_photo: 0.30       # peso fotoperiodo
+    w_forecast: 0.25    # peso calor proyectado 7 días
+    w_humidity: 0.10    # bonus de mitigación si humedad/riego ok
+  thresholds:
+    safe_below: 30
+    caution_below: 60
+
+# ---------------------------------------------------------------------
+# Coeficientes de cultivo Kc (FAO-56)
+# [BIEN ESTABLECIDO metodología] / [CALIBRAR valores en hoja]
+# semiarid: Ghamarnia et al. 2013 (Irán, lisímetro) — mejor análogo Murcia
+# tropical: Silva et al. 2018 (Brasil)
+# ---------------------------------------------------------------------
+kc_sets:
+  semiarid:                      # cultivo de semilla a madurez
+    initial: 0.66
+    development: 1.19
+    mid: 1.36
+    end: 0.98
+  tropical:
+    initial: 0.80
+    mid: 1.00
+    end: 0.80
+  leaf_default:                  # [CALIBRAR] curva truncada para corte de hoja
+    initial: 0.66
+    development: 1.00
+    mid: 1.10
+    end: 0.90
+
+# ---------------------------------------------------------------------
+# Riego / balance hídrico
+# ---------------------------------------------------------------------
+irrigation:
+  raw_fraction_p: 0.40   # p: fracción agotable sin estrés (RAW = p*TAW)
+  taw_mm: 60.0           # agua total disponible aprox. en zona radical
+  default_leaching_fraction: 0.0  # subir si EC del agua es alta
+
+# ---------------------------------------------------------------------
+# Helada
+# ---------------------------------------------------------------------
+frost:
+  hard_frost_c: 0.0      # plántulas: alerta alta si Tmin <= 0
+  established_tolerance_c: -2.0  # establecido tolera hasta ~-2
+
+# ---------------------------------------------------------------------
+# Parámetros de cultivo
+# ---------------------------------------------------------------------
+crop:
+  sow_depth_cm: [1, 2]
+  row_spacing_cm: [25, 30]
+  seed_rate_kg_ha: [12, 15]
+  ph_optimum: [6.2, 7.0]
+  direct_seed_only: true
+
+# ---------------------------------------------------------------------
+# Salinidad — [SIN UMBRAL PUBLICADO] medir EC del agua local.
+# Único dato: ~50% reducción germinación a ~150 mM NaCl (Zidan & Elewa 1995)
+# ---------------------------------------------------------------------
+salinity:
+  germination_50pct_reduction_mM_NaCl: 150
+  ece_threshold_dS_m: null   # desconocido: forzar entrada de EC en onboarding
+
+# ---------------------------------------------------------------------
+# Calendario de siembra por microclima (mes inicio - mes fin, ambos incl.)
+# Ventana segura de campo abierto. (PARTE 1-E)
+# ---------------------------------------------------------------------
+sowing_calendar:
+  costa:                 # Cartagena / Mar Menor: suave, casi sin helada
+    safe_months: [9, 10, 11, 12, 1, 2, 3]
+  valle:                 # valle del Segura / ciudad de Murcia
+    safe_months: [9, 10, 11, 12, 1, 2]
+  altiplano:             # Jumilla-Yecla / NO alto: helada invernal real
+    safe_months: [9, 10, 3, 4]
+  stagger_days: [14, 21] # escalonado dentro de la ventana
