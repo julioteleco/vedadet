@@ -10,6 +10,14 @@ y helada, más un **optimizador de ventana de siembra**. La IA (LLM) se usa
 > anclados en constantes con fuente (un único YAML versionado). El LLM solo
 > traduce las salidas a lenguaje llano. Esto evita alucinaciones en los cálculos.
 
+## 📚 Documentación
+
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** — cómo desplegar en otro entorno (local,
+  Docker, nube), variables de entorno y job diario.
+- **[PENDIENTE.md](PENDIENTE.md)** — qué falta (software, calibración agronómica,
+  límites del entorno) y qué está completo y probado. **Léelo antes de producción.**
+- **[.env.example](.env.example)** — todas las variables de entorno (todas opcionales).
+
 ## Por qué este alcance
 
 La Recomendación #1 de la especificación: *"Lanza la v1 solo con el núcleo
